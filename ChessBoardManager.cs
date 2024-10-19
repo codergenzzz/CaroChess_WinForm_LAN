@@ -12,9 +12,11 @@ namespace _241018_CaroChess_WinForm
 
         public List<List<Button>> Matrix { get; set; }  // ma trận lưu vị trí các điểm
 
+        // Khai báo sự kiện
         private event EventHandler playerMarked;
         private event EventHandler endedGame;
 
+        // Định nghĩa sự kiện
         public event EventHandler PlayerMarked { add { playerMarked += value; } remove { playerMarked -= value; } }
 
         public event EventHandler EndedGame { add { endedGame += value; } remove { endedGame -= value; } }
@@ -32,16 +34,22 @@ namespace _241018_CaroChess_WinForm
                 new Player("O", Image.FromFile(Application.StartupPath + "\\img\\o.png")),
                 new Player("X", Image.FromFile(Application.StartupPath + "\\img\\x-player.jpg")),
             };
-            CurrentPlayer = 0;
-            ChangePlayer();
         }
         #endregion
 
         #region Methods
         public void DrawChessBoard()
         {
+            // Clear màn hình và enable các ô
             _chessBoard.Enabled = true;
-            Matrix = new List<List<Button>>();  // khởi tạo matrix khi bắt đầu vẽ board
+            _chessBoard.Controls.Clear();
+
+            // Set người chơi lượt đầu
+            CurrentPlayer = 0;
+            ChangePlayer();
+
+            // khởi tạo matrix khi bắt đầu vẽ board
+            Matrix = new List<List<Button>>();
 
             for (int i = 0; i < Constants.CHESS_BOARD_HEIGHT; i++)
             {
