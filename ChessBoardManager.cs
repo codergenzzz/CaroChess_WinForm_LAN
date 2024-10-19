@@ -20,6 +20,9 @@ namespace _241018_CaroChess_WinForm
         public event EventHandler PlayerMarked { add { playerMarked += value; } remove { playerMarked -= value; } }
 
         public event EventHandler EndedGame { add { endedGame += value; } remove { endedGame -= value; } }
+
+        // Stack lưu lượt chơi
+        public Stack<PlayInfo> PlayTimeLine { get; set; }
         #endregion
 
         #region Initialize
@@ -34,6 +37,8 @@ namespace _241018_CaroChess_WinForm
                 new Player("O", Image.FromFile(Application.StartupPath + "\\img\\o.png")),
                 new Player("X", Image.FromFile(Application.StartupPath + "\\img\\x-player.jpg")),
             };
+
+            PlayTimeLine = new Stack<PlayInfo>();
         }
         #endregion
 
@@ -43,6 +48,7 @@ namespace _241018_CaroChess_WinForm
             // Clear màn hình và enable các ô
             _chessBoard.Enabled = true;
             _chessBoard.Controls.Clear();
+            PlayTimeLine.Clear();
 
             // Set người chơi lượt đầu
             CurrentPlayer = 0;
@@ -90,6 +96,12 @@ namespace _241018_CaroChess_WinForm
 
             Mark(btn);
 
+            // Thêm lượt đã đánh vào stack
+            PlayTimeLine.Push(new PlayInfo(GetChessPoint(btn), CurrentPlayer));
+
+            // Đổi lượt đánh
+            CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
+
             if (playerMarked != null)
             {
                 playerMarked(this, new EventArgs());
@@ -110,6 +122,34 @@ namespace _241018_CaroChess_WinForm
             {
                 endedGame(this, new EventArgs());
             }
+        }
+
+        public bool Undo()
+        {
+            if (PlayTimeLine.Count <= 0)
+            {
+                return false;
+            }
+
+            PlayInfo playInfo = PlayTimeLine.Pop();
+
+            Button btn = Matrix[playInfo.Point.Y][playInfo.Point.X];
+            btn.BackgroundImage = null;
+
+
+            if (PlayTimeLine.Count <= 0)
+            {
+                CurrentPlayer = 0;
+            }
+            else
+            {
+                playInfo = PlayTimeLine.Peek();
+                CurrentPlayer = playInfo.CurrentPlayer == 1 ? 0 : 1;
+            }
+
+            ChangePlayer();
+
+            return true;
         }
 
         private bool IsEndGame(Button btn)
@@ -292,8 +332,7 @@ namespace _241018_CaroChess_WinForm
             // Khi đánh thì đổi image của ô đã chọn
             btn.BackgroundImage = _players[CurrentPlayer].Mark;
 
-            // Đổi lượt đánh
-            CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
+
         }
 
         /// <summary>

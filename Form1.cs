@@ -28,6 +28,7 @@
         {
             timerCoolDown.Stop();
             pnlChessBoard.Enabled = false;
+            undoToolStripMenuItem.Enabled = false;
             MessageBox.Show("Kết thúc!!!");
         }
 
@@ -37,10 +38,19 @@
             pgbCoolDown.Value = 0;
             timerCoolDown.Stop();
 
+            // Mở lại undo
+            undoToolStripMenuItem.Enabled = true;
+
             // Vẽ lại bàn cờ
             ChessBoardManager.DrawChessBoard();
         }
-        void Undo() { }
+        void Undo()
+        {
+            if (!ChessBoardManager.Undo())
+            {
+                MessageBox.Show("Không thể undo nữa!");
+            }
+        }
         void Quit()
         {
             Application.Exit();
