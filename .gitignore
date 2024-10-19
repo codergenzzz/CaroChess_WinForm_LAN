@@ -1,0 +1,13 @@
+# Ignore Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignore compiled output
+bin/
+obj/
+
+# Ignore any log files
+*.log
