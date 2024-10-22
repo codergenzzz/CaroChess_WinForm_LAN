@@ -1,8 +1,11 @@
-﻿namespace _241018_CaroChess_WinForm
+﻿using System.Net.NetworkInformation;
+
+namespace _241018_CaroChess_WinForm
 {
     public partial class Form1 : Form
     {
         ChessBoardManager ChessBoardManager;
+        SocketManager SocketManager;
 
         public Form1()
         {
@@ -18,6 +21,7 @@
             pgbCoolDown.Value = 0;
 
             timerCoolDown.Interval = Constants.COOL_DOWN_INTERVAL;
+            SocketManager = new SocketManager();
 
             NewGame();
         }
@@ -54,6 +58,13 @@
         void Quit()
         {
             Application.Exit();
+        }
+
+        void Listen()
+        {
+            string revData = (string)SocketManager.Receive();
+
+            MessageBox.Show(revData);
         }
 
         #endregion
@@ -104,7 +115,53 @@
             }
 
         }
+        private void Btn_LANConnect_Click(object sender, EventArgs e)
+        {
+            SocketManager.IP = txbIP.Text;
+
+            if (!SocketManager.ConnectServer())
+            {
+                SocketManager.CreateServer();
+
+                Thread listenThread = new Thread(() =>
+                {
+                    while (true)
+                    {
+                        Thread.Sleep(500);
+                        try
+                        {
+                            Listen();
+                            break;
+                        }
+                        catch { }
+                    }
+                });
+                listenThread.IsBackground = true;
+                listenThread.Start();
+            }
+            else
+            {
+                Thread listenThread = new Thread(() =>
+                {
+                    Listen();
+                });
+                listenThread.IsBackground = true;
+                listenThread.Start();
+                SocketManager.Send("Thong tin tu client");
+            }
+
+        }
 
         #endregion
+
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            txbIP.Text = SocketManager.GetLocalIPv4(NetworkInterfaceType.Wireless80211);
+
+            if (string.IsNullOrEmpty(txbIP.Text))
+            {
+                txbIP.Text = SocketManager.GetLocalIPv4(NetworkInterfaceType.Ethernet);
+            }
+        }
     }
 }

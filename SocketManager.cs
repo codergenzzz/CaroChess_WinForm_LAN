@@ -62,8 +62,37 @@ namespace _241018_CaroChess_WinForm
         public const int BUFFER = 1024;
         public bool IsServer = true;
 
+        public bool Send(object obj)
+        {
+            byte[] sendData = SerializeData(obj);
 
+            return SendData(client, sendData);
+        }
 
+        public object Receive()
+        {
+            byte[] receiveData = new byte[BUFFER];
+            bool isOk = ReceiveData(client, receiveData);
+
+            if (isOk)
+            {
+                return DeserializeData(receiveData);
+            }
+            else
+            {
+                return "ERROR: Cann't not receidata";
+            }
+        }
+
+        private bool SendData(Socket target, byte[] data)
+        {
+            return target.Send(data) > 0 ? true : false;
+        }
+
+        private bool ReceiveData(Socket target, byte[] data)
+        {
+            return target.Receive(data) > 0 ? true : false;
+        }
 
 
         /// <summary>
