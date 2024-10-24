@@ -35,7 +35,7 @@ namespace _241018_CaroChess_WinForm
             timerCoolDown.Stop();
             pnlChessBoard.Enabled = false;
             undoToolStripMenuItem.Enabled = false;
-            MessageBox.Show("Kết thúc!!!");
+            //MessageBox.Show("Kết thúc!!!");
         }
         void NewGame()
         {
@@ -55,6 +55,8 @@ namespace _241018_CaroChess_WinForm
             {
                 MessageBox.Show("Không thể undo nữa!");
             }
+            //ChessBoardManager.Undo();
+            pgbCoolDown.Value = 0;
         }
         void Quit()
         {
@@ -86,6 +88,11 @@ namespace _241018_CaroChess_WinForm
                     MessageBox.Show(data.Message);
                     break;
                 case (int)SocketCommand.NEW_GAME:
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        NewGame();
+                        pnlChessBoard.Enabled = false;
+                    }));
 
                     break;
                 case (int)SocketCommand.SEND_POINT:
@@ -95,17 +102,23 @@ namespace _241018_CaroChess_WinForm
                         pnlChessBoard.Enabled = true;
                         timerCoolDown.Start();
                         ChessBoardManager.OtherPlayerMark(data.Point);
+                        undoToolStripMenuItem.Enabled = true;
                     }));
 
                     break;
                 case (int)SocketCommand.UNDO:
-
+                    Undo();
+                    pgbCoolDown.Value = 0;
                     break;
                 case (int)SocketCommand.END_GAME:
-
+                    MessageBox.Show("Thông báo end game!!!");
+                    break;
+                case (int)SocketCommand.TIME_OUT:
+                    MessageBox.Show("Thông báo timeout!!!");
                     break;
                 case (int)SocketCommand.QUIT:
-
+                    timerCoolDown.Stop();
+                    MessageBox.Show("Người chơi đã thoát");
                     break;
                 default:
                     break;
@@ -124,13 +137,16 @@ namespace _241018_CaroChess_WinForm
             pgbCoolDown.Value = 0;
 
             SocketManager.Send(new SocketData((int)SocketCommand.SEND_POINT, e.ClickedPoint, null));
-
+            undoToolStripMenuItem.Enabled = false;
             Listen();
         }
 
         private void chessBoard_EndedGame(object? sender, EventArgs e)
         {
             EndGame();
+
+            SocketManager.Send(new SocketData((int)SocketCommand.END_GAME, new Point(), null));
+
         }
 
         private void timerCoolDown_Tick(object sender, EventArgs e)
@@ -140,17 +156,22 @@ namespace _241018_CaroChess_WinForm
             if (pgbCoolDown.Value >= pgbCoolDown.Maximum)
             {
                 EndGame();
+                SocketManager.Send(new SocketData((int)SocketCommand.TIME_OUT, new Point(), null));
+
             }
         }
 
         private void newGame_Click(object sender, EventArgs e)
         {
             NewGame();
+            SocketManager.Send(new SocketData((int)SocketCommand.NEW_GAME, new Point(), null));
+            pnlChessBoard.Enabled = true;
         }
 
         private void undo_Click(object sender, EventArgs e)
         {
             Undo();
+            SocketManager.Send(new SocketData((int)SocketCommand.UNDO, new Point(), null));
         }
 
         private void quit_Click(object sender, EventArgs e)
@@ -163,6 +184,16 @@ namespace _241018_CaroChess_WinForm
             if (MessageBox.Show("Bạn có chắc muốn thoát!", "Thông báo", MessageBoxButtons.OKCancel) != System.Windows.Forms.DialogResult.OK)
             {
                 e.Cancel = true;
+            }
+            else
+            {
+                try
+                {
+                    SocketManager.Send(new SocketData((int)SocketCommand.QUIT, new Point(), ""));
+                }
+                catch
+                {
+                }
             }
 
         }
@@ -195,7 +226,4 @@ namespace _241018_CaroChess_WinForm
         }
         #endregion
     }
-
-
-
 }

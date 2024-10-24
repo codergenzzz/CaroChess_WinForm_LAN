@@ -151,6 +151,21 @@ namespace _241018_CaroChess_WinForm
                 return false;
             }
 
+            bool isUndo1 = UndoAStep();
+            bool isUndo2 = UndoAStep();
+
+            PlayInfo playInfo = PlayTimeLine.Peek();
+
+            return isUndo1 & isUndo2;
+        }
+
+        private bool UndoAStep()
+        {
+            if (PlayTimeLine.Count <= 0)
+            {
+                return false;
+            }
+
             PlayInfo playInfo = PlayTimeLine.Pop();
 
             Button btn = Matrix[playInfo.Point.Y][playInfo.Point.X];
