@@ -13,11 +13,11 @@ namespace _241018_CaroChess_WinForm
         public List<List<Button>> Matrix { get; set; }  // ma trận lưu vị trí các điểm
 
         // Khai báo sự kiện
-        private event EventHandler playerMarked;
+        private event EventHandler<ButtonClickEvent> playerMarked;
         private event EventHandler endedGame;
 
         // Định nghĩa sự kiện
-        public event EventHandler PlayerMarked { add { playerMarked += value; } remove { playerMarked -= value; } }
+        public event EventHandler<ButtonClickEvent> PlayerMarked { add { playerMarked += value; } remove { playerMarked -= value; } }
 
         public event EventHandler EndedGame { add { endedGame += value; } remove { endedGame -= value; } }
 
@@ -104,7 +104,7 @@ namespace _241018_CaroChess_WinForm
 
             if (playerMarked != null)
             {
-                playerMarked(this, new EventArgs());
+                playerMarked(this, new ButtonClickEvent(GetChessPoint(btn)));
             }
 
             if (IsEndGame(btn))
@@ -113,7 +113,27 @@ namespace _241018_CaroChess_WinForm
             }
 
             ChangePlayer();
+        }
 
+        public void OtherPlayerMark(Point point)
+        {
+            Button? btn = Matrix[point.Y][point.X];
+            if (btn.BackgroundImage != null)
+            {
+                return;
+            }
+
+            Mark(btn);
+
+            PlayTimeLine.Push(new PlayInfo(GetChessPoint(btn), CurrentPlayer));
+
+            CurrentPlayer = CurrentPlayer == 1 ? 0 : 1;
+            ChangePlayer();
+
+            if (IsEndGame(btn))
+            {
+                EndGame();
+            }
         }
 
         public void EndGame()
@@ -353,5 +373,17 @@ namespace _241018_CaroChess_WinForm
             btn.Text = $"{GetChessPoint(btn).X}, {GetChessPoint(btn).Y}";
         }
         #endregion
+    }
+
+    public class ButtonClickEvent : EventArgs
+    {
+        private Point clickedPoint;
+
+        public Point ClickedPoint { get => clickedPoint; set => clickedPoint = value; }
+
+        public ButtonClickEvent(Point point)
+        {
+            ClickedPoint = point;
+        }
     }
 }

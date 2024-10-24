@@ -11,6 +11,8 @@ namespace _241018_CaroChess_WinForm
         {
             InitializeComponent();
 
+            Control.CheckForIllegalCrossThreadCalls = false;
+
             ChessBoardManager = new ChessBoardManager(pnlChessBoard, txbPlayerName, ptbMark);
             ChessBoardManager.EndedGame += chessBoard_EndedGame;
             ChessBoardManager.PlayerMarked += chessBoard_PlayerMarked;
@@ -35,7 +37,6 @@ namespace _241018_CaroChess_WinForm
             undoToolStripMenuItem.Enabled = false;
             MessageBox.Show("Kết thúc!!!");
         }
-
         void NewGame()
         {
             // Dừng timer và reset progressbar
@@ -62,19 +63,69 @@ namespace _241018_CaroChess_WinForm
 
         void Listen()
         {
-            string revData = (string)SocketManager.Receive();
+            Thread listenThread = new Thread(() =>
+            {
+                try
+                {
+                    SocketData data = (SocketData)SocketManager.Receive();
 
-            MessageBox.Show(revData);
+                    ProcessData(data);
+                }
+                catch { }
+
+            });
+            listenThread.IsBackground = true;
+            listenThread.Start();
+        }
+
+        void ProcessData(SocketData data)
+        {
+            switch (data.Command)
+            {
+                case (int)SocketCommand.NOTIFY:
+                    MessageBox.Show(data.Message);
+                    break;
+                case (int)SocketCommand.NEW_GAME:
+
+                    break;
+                case (int)SocketCommand.SEND_POINT:
+                    this.Invoke((MethodInvoker)(() =>
+                    {
+                        pgbCoolDown.Value = 0;
+                        pnlChessBoard.Enabled = true;
+                        timerCoolDown.Start();
+                        ChessBoardManager.OtherPlayerMark(data.Point);
+                    }));
+
+                    break;
+                case (int)SocketCommand.UNDO:
+
+                    break;
+                case (int)SocketCommand.END_GAME:
+
+                    break;
+                case (int)SocketCommand.QUIT:
+
+                    break;
+                default:
+                    break;
+            }
+            Listen();
         }
 
         #endregion
 
         #region EventHandlers
 
-        private void chessBoard_PlayerMarked(object? sender, EventArgs e)
+        private void chessBoard_PlayerMarked(object? sender, ButtonClickEvent e)
         {
             timerCoolDown.Start();
+            pnlChessBoard.Enabled = false;
             pgbCoolDown.Value = 0;
+
+            SocketManager.Send(new SocketData((int)SocketCommand.SEND_POINT, e.ClickedPoint, null));
+
+            Listen();
         }
 
         private void chessBoard_EndedGame(object? sender, EventArgs e)
@@ -121,38 +172,17 @@ namespace _241018_CaroChess_WinForm
 
             if (!SocketManager.ConnectServer())
             {
+                SocketManager.IsServer = true;
+                pnlChessBoard.Enabled = true;
                 SocketManager.CreateServer();
-
-                Thread listenThread = new Thread(() =>
-                {
-                    while (true)
-                    {
-                        Thread.Sleep(500);
-                        try
-                        {
-                            Listen();
-                            break;
-                        }
-                        catch { }
-                    }
-                });
-                listenThread.IsBackground = true;
-                listenThread.Start();
             }
             else
             {
-                Thread listenThread = new Thread(() =>
-                {
-                    Listen();
-                });
-                listenThread.IsBackground = true;
-                listenThread.Start();
-                SocketManager.Send("Thong tin tu client");
+                SocketManager.IsServer = false;
+                pnlChessBoard.Enabled = false;
+                Listen();
             }
-
         }
-
-        #endregion
 
         private void Form1_Shown(object sender, EventArgs e)
         {
@@ -163,5 +193,9 @@ namespace _241018_CaroChess_WinForm
                 txbIP.Text = SocketManager.GetLocalIPv4(NetworkInterfaceType.Ethernet);
             }
         }
+        #endregion
     }
+
+
+
 }
