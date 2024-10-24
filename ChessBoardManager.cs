@@ -75,8 +75,6 @@ namespace _241018_CaroChess_WinForm
                     btn.Click += btn_clicked;
                     _chessBoard.Controls.Add(btn);
                     Matrix[i].Add(btn);
-
-                    //ShowPoint(btn);
                 }
             }
 
@@ -146,13 +144,18 @@ namespace _241018_CaroChess_WinForm
 
         public bool Undo()
         {
-            if (PlayTimeLine.Count <= 0)
+            if (PlayTimeLine.Count <= 1)
             {
                 return false;
             }
 
             bool isUndo1 = UndoAStep();
             bool isUndo2 = UndoAStep();
+
+            //if (PlayTimeLine.Count <= 0)
+            //{
+            //    return false;
+            //}
 
             PlayInfo playInfo = PlayTimeLine.Peek();
 

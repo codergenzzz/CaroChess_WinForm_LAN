@@ -26,6 +26,7 @@ namespace _241018_CaroChess_WinForm
             SocketManager = new SocketManager();
 
             NewGame();
+            pnlChessBoard.Enabled = false;
         }
 
         #region Methods
@@ -44,7 +45,10 @@ namespace _241018_CaroChess_WinForm
             timerCoolDown.Stop();
 
             // Mở lại undo
-            undoToolStripMenuItem.Enabled = true;
+            //undoToolStripMenuItem.Enabled = true;
+
+            // Đóng undo
+            undoToolStripMenuItem.Enabled = false;
 
             // Vẽ lại bàn cờ
             ChessBoardManager.DrawChessBoard();
@@ -111,7 +115,14 @@ namespace _241018_CaroChess_WinForm
                     pgbCoolDown.Value = 0;
                     break;
                 case (int)SocketCommand.END_GAME:
-                    MessageBox.Show("Thông báo end game!!!");
+                    if (data.Message == "0")
+                    {
+                        MessageBox.Show("Người chơi X chiến thắng!!!");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Người chơi O chiến thắng!!!");
+                    }
                     break;
                 case (int)SocketCommand.TIME_OUT:
                     MessageBox.Show("Thông báo timeout!!!");
@@ -144,8 +155,8 @@ namespace _241018_CaroChess_WinForm
         private void chessBoard_EndedGame(object? sender, EventArgs e)
         {
             EndGame();
-
-            SocketManager.Send(new SocketData((int)SocketCommand.END_GAME, new Point(), null));
+            var winner = ChessBoardManager.CurrentPlayer.ToString();
+            SocketManager.Send(new SocketData((int)SocketCommand.END_GAME, new Point(), $"{winner}"));
 
         }
 
