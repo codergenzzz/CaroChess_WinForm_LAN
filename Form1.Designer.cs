@@ -157,16 +157,17 @@
             btnLAN.TabIndex = 4;
             btnLAN.Text = "LAN";
             btnLAN.UseVisualStyleBackColor = false;
+            btnLAN.Click += Btn_LANConnect_Click;
             // 
             // txbIP
             // 
-            txbIP.BackColor = Color.PeachPuff;
+            txbIP.BackColor = Color.PaleTurquoise;
             txbIP.BorderStyle = BorderStyle.None;
-            txbIP.Font = new Font("Forte", 13.2000008F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            txbIP.ForeColor = Color.DeepSkyBlue;
+            txbIP.Font = new Font("Constantia", 13.2000008F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            txbIP.ForeColor = Color.Purple;
             txbIP.Location = new Point(80, 97);
             txbIP.Name = "txbIP";
-            txbIP.Size = new Size(138, 30);
+            txbIP.Size = new Size(138, 27);
             txbIP.TabIndex = 3;
             txbIP.Text = "127.0.0.1";
             txbIP.TextAlign = HorizontalAlignment.Center;
@@ -225,7 +226,7 @@
             // 
             newGameToolStripMenuItem.Name = "newGameToolStripMenuItem";
             newGameToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.N;
-            newGameToolStripMenuItem.Size = new Size(224, 26);
+            newGameToolStripMenuItem.Size = new Size(218, 26);
             newGameToolStripMenuItem.Text = "New Game";
             newGameToolStripMenuItem.Click += newGame_Click;
             // 
@@ -233,7 +234,7 @@
             // 
             undoToolStripMenuItem.Name = "undoToolStripMenuItem";
             undoToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.U;
-            undoToolStripMenuItem.Size = new Size(224, 26);
+            undoToolStripMenuItem.Size = new Size(218, 26);
             undoToolStripMenuItem.Text = "Undo";
             undoToolStripMenuItem.Click += undo_Click;
             // 
@@ -241,7 +242,7 @@
             // 
             quitToolStripMenuItem.Name = "quitToolStripMenuItem";
             quitToolStripMenuItem.ShortcutKeys = Keys.Control | Keys.Q;
-            quitToolStripMenuItem.Size = new Size(224, 26);
+            quitToolStripMenuItem.Size = new Size(218, 26);
             quitToolStripMenuItem.Text = "Quit";
             quitToolStripMenuItem.Click += quit_Click;
             // 
@@ -259,6 +260,7 @@
             Name = "Form1";
             Text = "CaroChess LAN";
             FormClosing += Form1_FormClosing;
+            Shown += Form1_Shown;
             pngPicture.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)ptbAvatar).EndInit();
             panel3.ResumeLayout(false);
